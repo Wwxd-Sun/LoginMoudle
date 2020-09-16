@@ -7,16 +7,45 @@
 //
 
 import UIKit
-
+import BaseMoudle
+import LoginMoudle
+import ConfigMoudle
+import URLNavigator
+import IQKeyboardManagerSwift
+import NetworkMoudle
+import UserMoudle
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    let navigator = Navigator()
 
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        AppRouter.initialize(navigator: navigator)
+        setCommonAppleance()
+        configModule()
+        IQKeyboardManager.shared.enable = true
         // Override point for customization after application launch.
         return true
+    }
+    
+    /**
+     设置导航等 的主题颜色
+     */
+    internal func setCommonAppleance(){
+        
+        UIApplication.shared.statusBarStyle = .lightContent
+        let navigationBarAppearance = UINavigationBar.appearance()
+        //设置显示的颜色
+        navigationBarAppearance.barTintColor = UIColor.white
+        navigationBarAppearance.tintColor = Theme.btn.normal
+        UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.foregroundColor:UIColor.black]
+        
+    
+        let tabBarAppearance = UITabBar.appearance()
+        tabBarAppearance.barTintColor = UIColor.white
+        tabBarAppearance.isOpaque = true
+        
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
@@ -44,3 +73,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+extension AppDelegate {
+    
+    /*
+     模块化基础配置
+     */
+       func configModule() {
+        Envs.baseUrl = ["http://seongbrave.cn/api/v1/"]
+        Envs.isDebug = true
+        NetWorkCore.baseUrl = Envs.baseUrl
+        Global.shared.updateUserFromService()
+    }
+}
