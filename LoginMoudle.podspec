@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'LoginMoudle'
-  s.version          = '0.0.2'
+  s.version          = '0.0.3'
   s.summary          = '登陆模块'
 
 # This description is used to generate tags and improve search results.
@@ -34,7 +34,7 @@ TODO: Add long description of the pod here.
   s.dependency 'UserMoudle', '~> 0.0.1'
   s.dependency 'NetworkMoudle', '~> 0.0.9'
   s.resource_bundles = {
-     'LoginMoudle' => ['LoginMoudle/Assets/*{.storyboard,.xcassets}']
+     'LoginMoudle' => ['LoginMoudle/Assets/*{.storyboard,.xcassets,.doc}']
   }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'

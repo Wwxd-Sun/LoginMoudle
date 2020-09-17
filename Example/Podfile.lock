@@ -21,7 +21,7 @@ PODS:
   - Kingfisher (5.15.0):
     - Kingfisher/Core (= 5.15.0)
   - Kingfisher/Core (5.15.0)
-  - LoginMoudle (0.0.2):
+  - LoginMoudle (0.0.3):
     - NetworkMoudle (~> 0.0.9)
     - UserMoudle (~> 0.0.1)
   - MBProgressHUD (1.2.0)
@@ -89,7 +89,7 @@ SPEC CHECKSUMS:
   CryptoSwift: f12f037f6d0fcd6d48c96db0071b653de64e6c4d
   IQKeyboardManagerSwift: c7df9d2deb356c04522f5c4b7b6e4ce4d8ed94fe
   Kingfisher: 1acb67597a520c2d0310677e66d6e0af455ef757
-  LoginMoudle: bc2fb945efc24b67c3a332ccc7a02cd3fad71224
+  LoginMoudle: e0e95a9876f8924e51f1bb79adcf0713c48d6d11
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
   NetworkMoudle: dd8cb4c29c2b498013391522dfc708aee3ad5681

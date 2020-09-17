@@ -19,6 +19,7 @@ public struct Carlisle_router {
             let loginVc:Login_vc = CarlisleCore.storyboard.instantiateViewController()
             loginVc.present = true
             let loginNav = Base_Nav(rootViewController: loginVc)
+            loginNav.modalPresentationStyle = .fullScreen
             navigator.present(loginNav)
             return true
         }

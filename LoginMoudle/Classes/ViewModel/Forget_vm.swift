@@ -63,7 +63,7 @@ class Forget_vm : BaseList_Vm {
                 }
                 return rel.isValid
             }
-            .map{Carlisle_api.sendmsgcode(phone: $0)}
+            .map{Carlisle_api.sendmsgcode(phone: $0, type: "3")}
             .emeRequestApiForRegJson()
             .subscribe(onNext: {[unowned self] (result) in
                 switch result {

@@ -25,7 +25,37 @@ class Login_vc: Base_Vc {
     @IBOutlet weak var rember_btn: UIButton!
     @IBOutlet weak var register_btn: UIButton!
     @IBOutlet weak var indicator_v: UIActivityIndicatorView!
+    /*----------------------------   自定义属性区域
+     ----------------------------*/
+    
     /*----------------------------   自定义属性区域    ----------------------------*/
+    /// 计时器
+    var countdownTimer: Timer?
+    
+    var remainingSeconds: Int = 0 {
+        willSet {
+            forget_btn.setTitle("\(newValue)秒", for: .normal)
+            if newValue <= 0 {
+                forget_btn.setTitle("获取验证码", for: .normal)
+                isCounting = false
+            }
+        }
+    }
+    
+    var isCounting = false {
+        willSet {
+            if newValue {
+                countdownTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(Login_vc.updateTime(_:)), userInfo: nil, repeats: true)
+                remainingSeconds = 60
+            } else {
+                countdownTimer?.invalidate()
+                countdownTimer = nil
+            }
+            forget_btn.isEnabled = !newValue
+        }
+    }
+    
+    
     var manageVm: Login_vm?
     var present:Bool = false
     
@@ -41,10 +71,12 @@ class Login_vc: Base_Vc {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        self.navigationController?.navigationBar.isHidden = false
     }
     
     override func didReceiveMemoryWarning() {
@@ -59,17 +91,17 @@ class Login_vc: Base_Vc {
      界面基础设置
      */
     override func setupUI() {
-        login_btn.loginTheme()
+//        login_btn.loginTheme()
         /**
          *  自定义 导航栏左侧 返回按钮
          */
-        self.customLeftBarButtonItem()
-        title = "登录"
+//        self.customLeftBarButtonItem()
+        
         if Global.isRember() {
             self.password_tf.text = Global.password()
         }
         self.username_tf.text = Global.userName()
-        self.rember_btn.isSelected = Global.isRember()
+//        self.rember_btn.isSelected = Global.isRember()
     }
     /**
      app 主题 设置
@@ -83,19 +115,19 @@ class Login_vc: Base_Vc {
     override func bindToViewModel() {
         
         self.register_btn.rx.tap
-            .map{("register",nil)}
-            .bind(to: self.view.rx_openUrl)
+            .subscribe(onNext: {
+                let webView = AgreementWeb_vc()
+                self.navigationController?.pushViewController(webView, animated: true)
+                
+            })
             .disposed(by: disposeBag)
+        
+        
         
         self.forget_btn.rx.tap
-            .map{("forget",nil)}
-            .bind(to: self.view.rx_openUrl)
-            .disposed(by: disposeBag)
-        
-        self.rember_btn
-            .rx.tap
             .subscribe(onNext: { [unowned self] ( _ ) in
-                self.rember_btn.isSelected = !self.rember_btn.isSelected
+                self.forget_btn.isEnabled = false
+                self.forget_btn.alpha = 0.2;
             })
             .disposed(by: disposeBag)
         
@@ -105,42 +137,69 @@ class Login_vc: Base_Vc {
         
         self.manageVm = Login_vm(
             input: (
-            username: Observable.of(
+                phone: Observable.of(
                 Observable.just( username_tf.text ?? ""),
                 username_tf.rx.text.orEmpty.asObservable()
                 )
                 .merge(),
-            password: Observable.of(
+                msgCode: Observable.of(
                 Observable.just( password_tf.text ?? ""),
                 password_tf.rx.text.orEmpty.asObservable()
                 )
                 .merge(),
-            loginTaps: login_btn.rx.tap.asObservable()
-            ),
-            validationService: LoginValidationService())
-        
+                loginTaps: login_btn.rx.tap.asObservable(),
+                msgCodeTaps: forget_btn.rx.tap.asObservable()),
+            validationService: RegisterImplementations())
         self.manageVm?.signupEnabled.asObservable()
             .subscribe(onNext: { [weak self] valid  in
                 self?.login_btn.isEnabled = valid
+                self?.login_btn.alpha = valid ? 1 : 0.2
             })
             .disposed(by: disposeBag)
         
-        self.manageVm?.loading.asObservable()
-            .bind(to: indicator_v.rx.isAnimating)
-            .disposed(by: disposeBag)
+        self.manageVm?.validatedPhone
+        .asObservable()
+        .subscribe(onNext: {[unowned self] (result) in
+            if result.isValid && self.remainingSeconds == 0{
+                self.forget_btn.isEnabled = true
+                self.forget_btn.alpha = 1;
+            }else{
+                self.forget_btn.alpha = 0.2;
+                self.forget_btn.isEnabled = false
+            }
+        })
+        .disposed(by: disposeBag)
         
         self.manageVm?.loginSuccess
             .subscribe(onNext: { [unowned self] (result) in
-                Global.updateIsRember(self.rember_btn.isSelected)
+//                Global.updateIsRember(self.rember_btn.isSelected)
                 Global.updateUserName(self.username_tf.text ?? "")
-                if self.rember_btn.isSelected {
-                    Global.updatePassword(self.password_tf.text ?? "")
-                }
-                self.view.toastCompletion("🥳 登陆成功啦~~~", completion: { _ in
+//                if self.rember_btn.isSelected {
+//                    Global.updatePassword(self.password_tf.text ?? "")
+//                }
+                self.view.toastCompletion("登陆成功", completion: { _ in
                     self.closeVc()
                 })
             })
             .disposed(by: disposeBag)
+        
+        self.manageVm?.sendMsgSuccess
+        .subscribe(onNext: {[unowned self] (json) in
+            if UtilCore.sharedInstance.isDebug{
+                self.view.toast("已发送")
+            }
+            self.isCounting = true
+        })
+        .disposed(by: disposeBag)
+        
+        self.manageVm?
+        .error
+        .asObserver()
+        .subscribe(onNext: { [unowned self] (_) in
+            self.remainingSeconds = 0
+            self.isCounting = false
+        })
+        .disposed(by: disposeBag)
         
         self.manageVm?
             .error
@@ -168,5 +227,7 @@ class Login_vc: Base_Vc {
 // MARK: - 自定义方法
 extension  Login_vc {
     
-    
+    @objc func updateTime( _ timer: Timer) {
+        remainingSeconds -= 1
+    }
 }

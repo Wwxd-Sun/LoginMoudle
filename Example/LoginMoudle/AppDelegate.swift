@@ -79,7 +79,7 @@ extension AppDelegate {
      模块化基础配置
      */
        func configModule() {
-        Envs.baseUrl = ["http://seongbrave.cn/api/v1/"]
+        Envs.baseUrl = ["http://10.100.51.107:8180"]
         Envs.isDebug = true
         NetWorkCore.baseUrl = Envs.baseUrl
         Global.shared.updateUserFromService()

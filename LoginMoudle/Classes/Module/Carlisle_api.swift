@@ -17,13 +17,17 @@ public enum Carlisle_api {
     /// 用户注册
     case register(phone: String, password: String,msgCode: String)
     ///登陆
-    case login(phone: String, password: String)
+    case login(phone: String, type: String,smsCode: String)
     ///发送验证码
-    case sendmsgcode(phone: String)
+    case sendmsgcode(phone: String, type: String)
     ///修改密码
     case updatepassword(phone: String, password: String,msgCode: String)
     ///退出登陆
-    case logout
+    case logout(token: String)
+    ///获取jwt Token
+    case getJWTToken(token: String)
+    ///登陆验证
+    case checkLoginPhone(phone:String, type:String)
 }
 
 extension Carlisle_api: TargetType {
@@ -34,13 +38,17 @@ extension Carlisle_api: TargetType {
         case .register:
             return "user/register"
         case .login:
-            return "user/login"
+            return "/fmsapi/user/login.json"
         case .sendmsgcode:
-            return "user/sendmsgcode"
+            return "/fmsapi/user/getSmsCode.json"
         case .updatepassword:
             return "user/updatepassword"
         case .logout:
-            return "user/logout"
+            return "/fmsapi/user/logout.json"
+        case .getJWTToken:
+            return "/fmsapi/user/logout.json"
+        case .checkLoginPhone:
+            return "/fmsapi/user/logout.json"
         }
     }
     
@@ -57,12 +65,18 @@ extension Carlisle_api: TargetType {
         switch self {
         case let .register(phone, password ,msgCode):
             return ["phone": phone, "password": password, "msgCode": msgCode]
-        case let .login(phone, password):
-            return ["phone": phone, "password": password]
-        case let .sendmsgcode(phone):
-            return ["phone": phone]
+        case let .login(phone, type, smsCode):
+            return ["phone": phone, "type": type, "smsCode":smsCode]
+        case let .sendmsgcode(phone, type):
+            return ["phone": phone, "type": type]
         case let .updatepassword(phone, password ,msgCode):
             return ["phone": phone, "password": password, "msgCode": msgCode]
+        case let .logout(token):
+            return ["token": token]
+        case let .getJWTToken(token):
+            return ["token": token]
+        case let .checkLoginPhone(phone,type):
+            return ["phone": phone, "type": type]
         default:
             return nil
         }
